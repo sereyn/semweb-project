@@ -1,0 +1,22 @@
+{
+  "name": "imdb",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "got": "^11.8.3",
+    "papaparse": "^5.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.11",
+    "@types/papaparse": "^5.3.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  }
+}
