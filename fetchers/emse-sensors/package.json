@@ -15,6 +15,10 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "got": "^11.8.3"
+    "@types/n3": "^1.10.4",
+    "@types/papaparse": "^5.3.1",
+    "got": "^11.8.3",
+    "n3": "^1.12.2",
+    "papaparse": "^5.3.1"
   }
 }
