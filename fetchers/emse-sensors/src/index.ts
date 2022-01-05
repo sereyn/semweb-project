@@ -58,20 +58,22 @@ function createStringToSend(results: ParseResult<any>): string {
         if (!exploredIds.has(x.id)) {
             writer += `${elUri} a sosa:Sensor .\n
             ${'<' + urlEmseKg + x.location + '>'} bot:hasElement ${elUri} .\n`
+
+            exploredIds.add(x.id)
         }
 
         if (!exploredSensors.has([x.id, nonEmptyProperty])) {
             writer += `${elUri} sosa:observes ${nonEmptyPropertyUri} .\n`
             
-            exploredIds.add(x.id)
             exploredSensors.add([x.id, nonEmptyProperty])
         }
         
-        writer += `${elUri} sosa:resultTime ${'\"' + new Date(x.time / 1000000).toISOString() + '\"^^xsd:dateTime'} ;
+        writer += `${elUri}
             sosa:madeObservation [
                 a sosa:Observation ;
                 sosa:observedProperty ${ nonEmptyPropertyUri } ;
-                sosa:hasSimpleResult ${ '\"' + (fixedObject as any)[nonEmptyProperty] + '\"^^xsd:decimal' }
+                sosa:hasSimpleResult ${ '\"' + (fixedObject as any)[nonEmptyProperty] + '\"^^xsd:decimal' } ;
+                sosa:resultTime ${'\"' + new Date(x.time / 1000000).toISOString() + '\"^^xsd:dateTime'}
             ] .\n`
     })
     return writer
@@ -81,13 +83,13 @@ function parseData(filePath: PathLike) {
     parse<any>(fs.createReadStream(filePath), {
         header: true,
         complete: function(results) {
-            // console.log(createStringToSend(results))
+            const stringToSend = createStringToSend(results)
             
             // Send to Triple Store
             got(`http://${host}/emse`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/turtle' },
-                body: createStringToSend(results),
+                body: stringToSend,
             })
             .then(() => console.log('Sent'))
             .catch(console.error)
@@ -100,6 +102,7 @@ function main() {
     fetchFile(url)
     .then(() => parseData(filePath))
     .catch(console.error)
+    parseData(filePath)
 }
 
 main()
