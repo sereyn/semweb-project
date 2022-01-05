@@ -13,12 +13,18 @@ interface MainTableRow {
     pression: number;
 }
 
+const HOST = "localhost:3030"
 const METEOCIEL_URL = new URL(
     "https://www.meteociel.fr/temps-reel/obs_villes.php?code2=7475&jour2=16&mois2=10&annee2=2021"
 )
 const MAIN_TBODY_SELECTOR =
     "body > table:nth-child(1) > tbody > tr.texte > td:nth-child(2) > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > center:nth-child(14) > table:nth-child(3) > tbody"
 const CACHE_FOLDER_PATH = path.join(".", "cache")
+
+// Bounds:
+// "2021-11-16T05:31:28.679Z"^^xsd:dateTime
+// "2021-11-15T05:31:28.932Z"^^xsd:dateTime
+const METEOCIEL_DATE = new Date(2021, 11, 16)
 
 function getFilename(url: URL) {
     return url.toString().replace(/[^a-zA-Z0-9]/g, "_")
@@ -92,12 +98,70 @@ function iterMainTable($: cheerio.CheerioAPI): MainTableRow[] {
     return rows
 }
 
+function rowsToTurtle(rows: MainTableRow[]) {
+    let turtle = `
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+        @prefix sosa: <http://www.w3.org/ns/sosa/> .
+        @prefix seas: <https://w3id.org/seas/> .
+        @prefix bot: <https://w3id.org/bot#>  .
+        @prefix ex: r .
+
+        <http://example.com/saintetienne#temperature>
+            a seas:TemperatureProperty .
+        
+        <http://example.com/saintetienne#humidity>
+            a seas:HumidityProperty .
+
+        <http://example.com/saintetienne#atmosphericPressure>
+            a seas:AtmosphericPressureProperty .
+        
+        s
+            a sosa:Sensor ;
+            sosa:observes
+                <http://example.com/saintetienne#temperature> ,
+                <http://example.com/saintetienne#humidity> ,
+                <http://example.com/saintetienne#atmosphericPressure> .\n\n`
+
+    for (let row of rows) {
+        const rowDate = new Date(METEOCIEL_DATE.getTime())
+        rowDate.setHours(row.heureLocale)
+        turtle += `
+            ex:meteociel sosa:madeObservation [
+                a sosa:Observation ;
+                sosa:observedProperty <http://example.com/saintetienne#temperature> ;
+                sosa:hasSimpleResult "` + row.temperature + `"^^xsd:decimal ;
+                sosa:resultTime "` + rowDate.toISOString() + `"^^xsd:dateTime
+            ] .\n`
+        turtle += `
+            ex:meteociel sosa:madeObservation [
+                a sosa:Observation ;
+                sosa:observedProperty <http://example.com/saintetienne#humidity> ;
+                sosa:hasSimpleResult "` + row.humidite + `"^^xsd:decimal ;
+                sosa:resultTime "` + rowDate.toISOString() + `"^^xsd:dateTime
+            ] .\n`
+        turtle += `
+            ex:meteociel sosa:madeObservation [
+                a sosa:Observation ;
+                sosa:observedProperty <http://example.com/saintetienne#atmosphericPressure> ;
+                sosa:hasSimpleResult "` + row.pression + `"^^xsd:decimal ;
+                sosa:resultTime "` + rowDate.toISOString() + `"^^xsd:dateTime
+            ] .\n`
+    }
+
+    return turtle
+}
+
 async function main() {
     // await initCacheFolder()
     // await cacheFile(METEOCIEL_URL)
 
     const $ = await createCheerioContext(METEOCIEL_URL)
-    for (let i of iterMainTable($)) console.log(i)
+    const turtle = rowsToTurtle(iterMainTable($))
+    await got(`http://${HOST}/emse`, {
+        method: "POST",
+        headers: { "Content-Type": "text/turtle" },
+        body: turtle,
+    })
 }
 
 main().catch(console.error)
