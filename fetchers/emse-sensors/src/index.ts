@@ -99,9 +99,9 @@ function parseData(filePath: PathLike) {
 }
 
 function main() {
-    fetchFile(url)
-    .then(() => parseData(filePath))
-    .catch(console.error)
+    // fetchFile(url)
+    // .then(() => parseData(filePath))
+    // .catch(console.error)
     parseData(filePath)
 }
 
