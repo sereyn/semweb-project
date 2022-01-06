@@ -24,7 +24,7 @@ const CACHE_FOLDER_PATH = path.join(".", "cache")
 // Bounds:
 // "2021-11-16T05:31:28.679Z"^^xsd:dateTime
 // "2021-11-15T05:31:28.932Z"^^xsd:dateTime
-const METEOCIEL_DATE = new Date(2021, 11, 16)
+const METEOCIEL_DATE = new Date(2021, 11 - 1, 16)
 
 function getFilename(url: URL) {
     return url.toString().replace(/[^a-zA-Z0-9]/g, "_")
@@ -104,7 +104,7 @@ function rowsToTurtle(rows: MainTableRow[]) {
         @prefix sosa: <http://www.w3.org/ns/sosa/> .
         @prefix seas: <https://w3id.org/seas/> .
         @prefix bot: <https://w3id.org/bot#>  .
-        @prefix ex: r .
+        @prefix ex: <http://example.com/> .
 
         <http://example.com/saintetienne#temperature>
             a seas:TemperatureProperty .
@@ -115,7 +115,7 @@ function rowsToTurtle(rows: MainTableRow[]) {
         <http://example.com/saintetienne#atmosphericPressure>
             a seas:AtmosphericPressureProperty .
         
-        s
+        ex:meteociel
             a sosa:Sensor ;
             sosa:observes
                 <http://example.com/saintetienne#temperature> ,
