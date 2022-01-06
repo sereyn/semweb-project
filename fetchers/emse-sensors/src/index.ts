@@ -53,7 +53,11 @@ function createStringToSend(results: ParseResult<any>): string {
         } catch {
             return
         }
-        const nonEmptyPropertyUri = '<' + urlEmseKg + x.location + '#' + nonEmptyProperty +'>'
+        const locationMatch = x.location.match(/emse\/fayol\/e(\d+)\/S([\d\w]+)/)
+        if (locationMatch === null) return
+        const etage = locationMatch[1]
+        const salle = locationMatch[2]
+        const nonEmptyPropertyUri = `<${urlEmseKg}emse/fayol/${etage}ET/${salle}#${nonEmptyProperty}>`
 
         if (!exploredIds.has(x.id)) {
             writer += `${elUri} a sosa:Sensor .\n
