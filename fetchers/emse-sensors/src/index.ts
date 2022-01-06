@@ -5,7 +5,7 @@ import path from 'path'
 import { parse, ParseResult } from 'papaparse'
 import ObjectSet from './object-set'
 
-const host = '192.168.1.106:3030'
+const host = 'localhost:3030'
 const url = new URL("https://seafile.emse.fr/d/710ced68c2894189a6f4/files/?p=%2F20211116-daily-sensor-measures.csv&dl=1")
 const filePath = path.join(".", path.basename(url.pathname))
 
@@ -103,10 +103,9 @@ function parseData(filePath: PathLike) {
 }
 
 function main() {
-    // fetchFile(url)
-    // .then(() => parseData(filePath))
-    // .catch(console.error)
-    parseData(filePath)
+    fetchFile(url)
+    .then(() => parseData(filePath))
+    .catch(console.error)
 }
 
 main()

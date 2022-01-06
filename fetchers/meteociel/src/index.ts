@@ -152,8 +152,8 @@ function rowsToTurtle(rows: MainTableRow[]) {
 }
 
 async function main() {
-    // await initCacheFolder()
-    // await cacheFile(METEOCIEL_URL)
+    await initCacheFolder()
+    await cacheFile(METEOCIEL_URL)
 
     const $ = await createCheerioContext(METEOCIEL_URL)
     const turtle = rowsToTurtle(iterMainTable($))
